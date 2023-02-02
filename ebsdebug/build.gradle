@@ -35,6 +35,23 @@ android {
     }
 }
 
+//publishing {
+//    publications {
+//        create("gpr") {
+//            run {
+//                groupId = "com.ebs.integrator.ebsdebug"
+//                artifactId = getArtificatId("EbsDebug")
+//                version = getVersionName("1.0.0")
+//                artifact("$buildDir/outputs/aar/${getArtificatId("EbsDebug")}-release.aar")
+//            }
+//        }
+//    }
+//
+//    repositories {
+//
+//    }
+//}
+
 dependencies {
 
     implementation 'androidx.core:core-ktx:1.9.0'
