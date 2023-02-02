@@ -3,17 +3,14 @@ package com.ebs.integrator.ebsdebug.interceptor
 import android.content.Context
 import android.util.Log
 import com.ebs.integrator.ebsdebug.enums.EbsLevel
-import com.ebs.integrator.ebsdebug.logger.Logger
+import com.ebs.integrator.ebsdebug.logger.LogsRepository
 import com.ebs.integrator.ebsdebug.models.NetworkModel
 import com.ebs.integrator.ebsdebug.models.RequestModel
 import com.ebs.integrator.ebsdebug.models.ResponseModel
-import com.ebs.integrator.ebsdebug.logger.LogsRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import okhttp3.Interceptor
-import okhttp3.Request
-import okhttp3.Response
+import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor
 import okio.Buffer
 import okio.IOException
@@ -32,6 +29,7 @@ class EbsInterceptor : Interceptor {
 
     override fun intercept(chain: Interceptor.Chain): Response {
         val request: Request = chain.request()
+        request.cacheControl
 
         val requestModel = RequestModel(
             time = Date().time,
@@ -45,11 +43,16 @@ class EbsInterceptor : Interceptor {
 
 
         val response = chain.proceed(request)
+
+        val contentType: MediaType? = response.body!!.contentType()
+
+        val bodyString = response.body?.string()
+
         val responseModel = ResponseModel(
             time = Date().time,
             code = response.code.toString(),
             headers = response.headers.toString(),
-            body = response.body?.string()
+            body = bodyString
         )
         val repo = LogsRepository(context)
         CoroutineScope(Dispatchers.IO).launch {
@@ -60,7 +63,8 @@ class EbsInterceptor : Interceptor {
 
         Log.e("Response", responseModel.toString())
 
-        return response
+        val body: ResponseBody? = bodyString?.let { ResponseBody.create(contentType, it) }
+        return response.newBuilder().body(body).build()
     }
 
     class Builder(val context: Context) {

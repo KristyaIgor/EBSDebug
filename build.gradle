@@ -2,7 +2,8 @@
 plugins {
     id 'com.android.application' version '7.3.0' apply false
     id 'com.android.library' version '7.3.0' apply false
-    id 'org.jetbrains.kotlin.android' version '1.7.10' apply false
+    id 'org.jetbrains.kotlin.android' version '1.8.0' apply false
+
 }
 
 subprojects {
@@ -10,18 +11,5 @@ subprojects {
         google()
         mavenCentral()
         maven { url 'https://jitpack.io' }
-
-        maven {
-            name = "GitHubPackages"
-            /** Configure path of your package repository on Github
-             *  Replace GITHUB_USERID with your/organisation Github userID and REPOSITORY with the repository name on GitHub
-             */
-            url = uri("https://maven.pkg.github.com/KristyaIgor/EBSDebug") // Github Package
-            credentials {
-                //Fetch these details from the properties file or from Environment variables
-                username = "KristyaIgor" //?: System.getenv("GPR_USER")
-                password = "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" as String //?: System.getenv("GPR_API_KEY")
-            }
-        }
     }
 }
