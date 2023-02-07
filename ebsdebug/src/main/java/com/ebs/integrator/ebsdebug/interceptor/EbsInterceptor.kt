@@ -10,7 +10,11 @@ import com.ebs.integrator.ebsdebug.models.ResponseModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import okhttp3.*
+import okhttp3.Interceptor
+import okhttp3.MediaType
+import okhttp3.Request
+import okhttp3.Response
+import okhttp3.ResponseBody.Companion.toResponseBody
 import okhttp3.logging.HttpLoggingInterceptor
 import okio.Buffer
 import okio.IOException
@@ -18,52 +22,45 @@ import java.util.*
 
 
 class EbsInterceptor : Interceptor {
-    private var httpLoggingInterceptor: HttpLoggingInterceptor
     private  var context: Context
 
-    constructor(context: Context,httpLoggingInterceptor: HttpLoggingInterceptor) {
-        this.httpLoggingInterceptor = httpLoggingInterceptor
+    constructor(context: Context) {
         this.context = context
     }
 
 
     override fun intercept(chain: Interceptor.Chain): Response {
         val request: Request = chain.request()
-        request.cacheControl
-
-        val requestModel = RequestModel(
-            time = Date().time,
-            method = request.method,
-            url = request.url.toString(),
-            headers = request.headers.toString(),
-            body = stringifyRequestBody(request)
-        )
-
-        Log.e("Request", requestModel.toString())
-
 
         val response = chain.proceed(request)
+        val repo = LogsRepository(context)
 
         val contentType: MediaType? = response.body!!.contentType()
-
         val bodyString = response.body?.string()
 
-        val responseModel = ResponseModel(
-            time = Date().time,
-            code = response.code.toString(),
-            headers = response.headers.toString(),
-            body = bodyString
-        )
-        val repo = LogsRepository(context)
         CoroutineScope(Dispatchers.IO).launch {
+            val requestModel = RequestModel(
+                time = Date().time,
+                method = request.method,
+                url = request.url.toString(),
+                headers = request.headers.toString(),
+                body = stringifyRequestBody(request)
+            )
+            Log.e("Request", requestModel.toString())
+
+            val responseModel = ResponseModel(
+                time = Date().time,
+                code = response.code.toString(),
+                headers = response.headers.toString(),
+                body = bodyString
+            )
+            Log.e("Response", responseModel.toString())
+
             val currentModels = repo.getRequestsModels().toMutableList()
             currentModels.add(NetworkModel(requestModel, responseModel))
             repo.addRequestModel(currentModels)
         }
-
-        Log.e("Response", responseModel.toString())
-
-        val body: ResponseBody? = bodyString?.let { ResponseBody.create(contentType, it) }
+        val body = bodyString?.toResponseBody(contentType)
         return response.newBuilder().body(body).build()
     }
 
@@ -76,7 +73,7 @@ class EbsInterceptor : Interceptor {
         }
 
         fun build(): EbsInterceptor {
-            return EbsInterceptor(context ,loggingInterceptor)
+            return EbsInterceptor(context)
         }
     }
 

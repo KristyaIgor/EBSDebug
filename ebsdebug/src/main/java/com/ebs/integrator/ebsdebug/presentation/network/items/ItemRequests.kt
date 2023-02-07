@@ -65,14 +65,14 @@ class ItemRequestsDelegate(
             viewHolder.bind(model.item)
         else {
             payloads.forEach {
-                when (it) {
+//                when (it) {
 //                    is ItemBillBinder.Payloads.OnSumChanged -> {
 //                        viewHolder.loadSum(it.number, it.sum)
 //                    }
 //                    is ItemBillBinder.Payloads.OnTableChanged -> {
 //                        viewHolder.loadTable(it.tableId)
 //                    }
-                }
+//                }
             }
             viewHolder.setClicks(model.item.networkModel)
         }

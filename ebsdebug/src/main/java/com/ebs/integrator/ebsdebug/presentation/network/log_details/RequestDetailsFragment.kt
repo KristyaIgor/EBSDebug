@@ -1,30 +1,20 @@
 package com.ebs.integrator.ebsdebug.presentation.network.log_details
 
 import android.app.Dialog
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
-import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.GridLayoutManager
-import com.ebs.integrator.ebsdebug.common.delegates.CompositeAdapter
-import com.ebs.integrator.ebsdebug.common.delegates.DelegateAdapterItem
-import com.ebs.integrator.ebsdebug.databinding.InfoDialogFragmentBinding
-import com.ebs.integrator.ebsdebug.databinding.LogsDialogFragmentBinding
-import com.ebs.integrator.ebsdebug.databinding.NetworkDialogFragmentBinding
+import android.widget.Toast
 import com.ebs.integrator.ebsdebug.databinding.RequestDetailsDialogFragmentBinding
-import com.ebs.integrator.ebsdebug.logger.LogsRepository
-import com.ebs.integrator.ebsdebug.presentation.network.items.ItemRequests
-import com.ebs.integrator.ebsdebug.presentation.network.items.ItemRequestsBinder
-import com.ebs.integrator.ebsdebug.presentation.network.items.ItemRequestsDelegate
 import com.ebs.integrator.ebsdebug.utils.TransferUtils
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 
 class RequestDetailsFragment : BottomSheetDialogFragment() {
@@ -49,6 +39,14 @@ class RequestDetailsFragment : BottomSheetDialogFragment() {
             binding.textUrl.text = netModel.request.url
             binding.textMethod.text = netModel.request.method
             binding.textResponseCode.text = netModel.response.code
+
+            binding.textUrl.setOnClickListener{
+                val clipboard =
+                    context?.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                val clip = ClipData.newPlainText("Copied Text", binding.textUrl.text)
+                clipboard.setPrimaryClip(clip)
+                Toast.makeText(context, "Copied: ${binding.textUrl.text}!", Toast.LENGTH_SHORT).show()
+            }
 
             binding.itemRawRequestBody.setOnClickListener {
                 val netDetails = TextFragment.newInstance("Request body", netModel.request.body)

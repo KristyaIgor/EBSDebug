@@ -74,15 +74,12 @@ class InfoFragment : BottomSheetDialogFragment() {
                         log.add(newLine)
                     }
                 }
-
-            withContext(Dispatchers.Main) {
-
-            }
         }
 
         lifecycleScope.launch(Dispatchers.Main) {
             delay(250)
             binding.textCountLogs.text = "${log.size}"
+            TransferUtils.setLogs(log)
         }
 
         binding.itemLogs.setOnClickListener {
@@ -92,7 +89,7 @@ class InfoFragment : BottomSheetDialogFragment() {
         }
 
         binding.itemReport.setOnClickListener {
-            val logDetails = ReportFragment.newInstance(arguments?.getString("photo"))
+            val logDetails = ReportFragment.newInstance()
             logDetails.show(childFragmentManager, ReportFragment::class.simpleName)
         }
 
@@ -123,12 +120,12 @@ class InfoFragment : BottomSheetDialogFragment() {
     }
 
     companion object {
-        fun newInstance(takeScreenshot: Uri?): InfoFragment = InfoFragment()
-            .apply {
-                arguments = Bundle().apply {
-                    putString("photo",takeScreenshot.toString())
-                }
-            }
+        fun newInstance(): InfoFragment = InfoFragment()
+//            .apply {
+//                arguments = Bundle().apply {
+//                    putString("photo",takeScreenshot.toString())
+//                }
+//            }
     }
 
 }
